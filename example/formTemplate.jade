@@ -1,0 +1,6 @@
+-each __val, __k in %s.fields
+  label(for=__k) #{__k}
+  - if (%s.error && %s.error[__k])
+    .error #{%s.error[__k].message}
+  div
+    field(widget=%s.fields[__k].widget , value=%s.values[__k])
