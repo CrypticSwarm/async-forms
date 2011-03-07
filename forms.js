@@ -1,6 +1,10 @@
 var step = require('step')
-, Form = exports.Form = function Form(fields) {
+, Form = exports.Form = function Form(name, fields) {
+  this.name = name;
   this.fields = fields;
+	Object.keys(fields).forEach(function(key){
+		fields[key].name = name + '[' + key + ']'
+	})
 }
 , ValidatorError = exports.ValidatorError = function ValidatorError(field, message) {
   this.name = 'ValidatorError';
@@ -52,6 +56,16 @@ Form.prototype.validate = function validate(callback) {
 }
 
 exports.validator = {}
+
+exports.validator.regex = function(regex, options) {
+  options = options || {};
+	return function(field, val, callback) {
+    if(regex.test(val)) return callback();
+    var err = new ValidatorError(field, 'invalid email');
+		return callback(err);
+	}
+}
+
 exports.validator.length = function length(len, options) {
   return function lengthValidator(field, val, callback) {
     var msg = '';
@@ -65,10 +79,6 @@ exports.validator.length = function length(len, options) {
 }
 
 exports.validator.email = function email(options) {
-  options = options || {};
-  return function email(field, val, callback) {
-    if(/^[a-zA-Z][\w\-]*\w(\+[\w\-]*\w)?@\w+\.\w{2,}/.test(val)) return callback();
-    var err = new ValidatorError(field, 'invalid email');
-		return callback(err);
-  }
+	return exports.validator.regex(/^[a-zA-Z][\w\-]*\w(\+[\w\-]*\w)?@\w+\.\w{2,}/, options)
 }
+
