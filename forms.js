@@ -1,10 +1,11 @@
 var step = require('step')
-, Form = exports.Form = function Form(name, fields) {
+, Form = exports.Form = function Form(name, fields, opts) {
   this.name = name;
   this.fields = fields;
   Object.keys(fields).forEach(function(key){
     fields[key].name = name + '[' + key + ']'
   })
+  if (opts && opts.postValidator) this.postValidator = opts.postValidator
 }
 , ValidatorError = exports.ValidatorError = function ValidatorError(field, message) {
   this.name = 'ValidatorError';
@@ -23,6 +24,7 @@ Form.prototype.bindValues = function bindValues(values) {
 Form.prototype.validate = function validate(callback) {
   var fields = this.fields
     , values = this.values
+    , form = this
     , error = this.error = this.error || {};
   step
     ( function(){
@@ -36,15 +38,13 @@ Form.prototype.validate = function validate(callback) {
               return this.parallel()(err);
             }
             fields[fieldName].value = values[fieldName];
-            var cb = this.parallel();
-            fields[fieldName].validator(fields[fieldName], values[fieldName], function(err) {
-              if (err) {
-                error[fieldName] = err;
-              }
-              cb(err);
-            });
+            fields[fieldName].validator(fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
           }
         }, this);
+        if (form.postValidator) {
+          calledValidator = true;
+          form.postValidator(validatorCallbackGen(this.parallel()));
+        }
         if (!calledValidator) this();
       }
     , function (err) {
@@ -53,15 +53,25 @@ Form.prototype.validate = function validate(callback) {
     , callback
     );
     
+  function validatorCallbackGen(cb) {
+    return function validatorCallback(err) {
+      if (err) {
+        var matches = /\[(.*)\]/.exec(err.field) 
+        error[matches[1]] = err
+      }
+      cb(err);
+    }
+  }
 }
 
 exports.validator = {}
 
 exports.validator.regex = function(regex, options) {
   options = options || {};
+  var msg = options.msg || 'invalid'
   return function(field, val, callback) {
     if(regex.test(val)) return callback();
-    var err = new ValidatorError(field, 'invalid email');
+    var err = new ValidatorError(field, msg);
     return callback(err);
   }
 }
