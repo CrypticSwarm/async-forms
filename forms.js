@@ -38,7 +38,8 @@ Form.prototype.validate = function validate(callback) {
               return this.parallel()(err);
             }
             fields[fieldName].value = values[fieldName];
-            fields[fieldName].validator(fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
+            if (Array.isArray(fields[fieldName].validator)) multiValidator(fields[fieldName].validator, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
+            else fields[fieldName].validator(fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
           }
         }, this);
         if (form.postValidator) {
@@ -62,6 +63,18 @@ Form.prototype.validate = function validate(callback) {
       cb(err);
     }
   }
+}
+
+function multiValidator(validatorList, field, val, callback) {
+  var cur = 0
+    , len = validatorList.length;
+  function cb(err) {
+    cur++;
+    if (err) return callback(err);
+    if (cur == len) return callback(); 
+    validatorList[cur](field, val, cb);
+  } 
+  validatorList[cur](field, val, cb);
 }
 
 exports.validator = {}
