@@ -1,7 +1,9 @@
 var step = require('step')
 , Field = { getDisplay: 
   function() {
-    return this.label || this.key
+    return (this.label || this.key)
+      .replace(/[a-z][A-Z]|_[a-zA-Z]/g, function(m) { return m[0] === '_' ? ' ' + m[1].toUpperCase() : m[0] + ' ' + m[1] })
+      .replace(/^[a-z]/, function(m) { return m.toUpperCase() })
   }
 }
 , Form = exports.Form = function Form(name, fields, opts) {
