@@ -1,19 +1,26 @@
 var step = require('step')
+, Field = { getDisplay: 
+  function() {
+    return this.label || this.key
+  }
+}
 , Form = exports.Form = function Form(name, fields, opts) {
-  this.name = name;
-  this.fields = fields;
+  this.name = name
+  this.fields = fields
   Object.keys(fields).forEach(function(key){
+    fields[key].key = key
     fields[key].name = name + '[' + key + ']'
+    fields[key].__proto__ = Field
   })
   if (opts && opts.postValidator) this.postValidator = opts.postValidator
 }
-, ValidatorError = exports.ValidatorError = function ValidatorError(field, message) {
+, ValidatorError = exports.ValidatorError = function ValidatorError(field, message, value) {
   this.name = 'ValidatorError';
   Error.call(this, message);
   Error.captureStackTrace(this, arguments.callee);
   this.message = message;
   this.field = field.name
-  this.fieldVal = field.value;
+  this.fieldVal = value 
 }
 ValidatorError.prototype.__proto__ = Error.prototype
 
@@ -30,14 +37,14 @@ Form.prototype.validate = function validate(callback) {
     ( function(){
         var calledValidator = false;
         Object.keys(fields).forEach(function(fieldName) {
-          if (fields[fieldName].required !== false && fields[fieldName].validator) {
+          if (fields[fieldName].required !== false && values[fieldName] == null || values[fieldName] === '') {
             calledValidator = true;
-            if (values[fieldName] == null || values[fieldName] === '') {
-              var err = new ValidatorError(fields[fieldName], 'required field');
-              error[fieldName] = err;
-              return this.parallel()(err);
-            }
-            fields[fieldName].value = values[fieldName];
+            var err = new ValidatorError(fields[fieldName], 'required field', values[fieldName]);
+            error[fieldName] = Array.isArray(error[fieldName]) ? error[fieldName].push(err) : [err]
+            return this.parallel()(err);
+          }
+          
+          if (fields[fieldName].validator) {
             if (Array.isArray(fields[fieldName].validator)) multiValidator(fields[fieldName].validator, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
             else fields[fieldName].validator(fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
           }
@@ -58,7 +65,8 @@ Form.prototype.validate = function validate(callback) {
     return function validatorCallback(err) {
       if (err) {
         var matches = /\[(.*)\]/.exec(err.field) 
-        error[matches[1]] = err
+          , fieldName = matches[1]
+        Array.isArray(error[fieldName]) ? error[fieldName].push(err) : error[fieldName] = [err]
       }
       cb(err);
     }
@@ -111,7 +119,7 @@ exports.validator.email = function email(options) {
 exports.validator.choice = function(choices, opts) {
   return function choiceValidator(field, val, callback) {
     if (choices[val] != null) return callback();
-    callback(new ValidatorError(field, 'invalid choice')) //switch this to use passed in message
+    callback(new ValidatorError(field, 'invalid choice', val)) //switch this to use passed in message
   }
 }
 
