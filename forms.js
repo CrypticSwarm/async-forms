@@ -84,19 +84,22 @@ exports.validator.regex = function(regex, options) {
   var msg = options.msg || 'invalid'
   return function(field, val, callback) {
     if(regex.test(val)) return callback();
-    var err = new ValidatorError(field, msg);
+    var err = new ValidatorError(field, msg, val);
     return callback(err);
   }
 }
 
 exports.validator.length = function length(len, options) {
+  options = options || {};
+  var shortMsg = options.shortMsg || "Too short. $2 needs to be at least characters $1 long."
+    , longMsg = options.longMsg || "Too long.  $2 needs to be less then $1 characters long."
   return function lengthValidator(field, val, callback) {
     var msg = '';
-    if (typeof len === 'number' && val.length > len) msg += 'numerical.  Greater than upper bound.';
-    if (len.min != null && len.min > val.length) msg += 'under min lower bound';
-    if (len.max != null && len.max < val.length) msg += 'over max upper bound';
+    if (typeof len === 'number' && val.length > len) msg += longMsg.replace('$1', len).replace('$2', field.getDisplay())
+    if (len.min != null && len.min > val.length) msg += shortMsg.replace('$1', len.min).replace('$2', field.getDisplay())
+    if (len.max != null && len.max < val.length) msg += longMsg.replace('$1', len.max).replace('$2', field.getDisplay())
     if (!msg) return callback();
-    var err = new ValidatorError(field, 'invalid length' + msg)
+    var err = new ValidatorError(field, msg, val)
     callback(err);
   }
 }
