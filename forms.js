@@ -431,8 +431,8 @@ exports.widgets.country = function(defaultVal) {
 };
 
 exports.fields = {};
-exports.fields.choice = function(choices) {
-  return { widget: exports.widgets.choice(choices)
+exports.fields.choice = function(choices, defaultVal) {
+  return { widget: exports.widgets.choice(choices, defaultVal)
     , validator: exports.validator.choice(choices)
     }
 };
