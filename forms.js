@@ -6,6 +6,7 @@ var step = require('step')
       .replace(/^[a-z]/, function(m) { return m.toUpperCase() })
   }
 }
+
 , Form = exports.Form = function Form(name, fields, opts) {
   this.name = name
   this.fields = fields
@@ -16,12 +17,13 @@ var step = require('step')
   })
   if (opts && opts.postValidator) this.postValidator = opts.postValidator
 }
+
 , ValidatorError = exports.ValidatorError = function ValidatorError(field, message, value) {
   this.name = 'ValidatorError';
   Error.call(this, message);
   Error.captureStackTrace(this, arguments.callee);
   this.message = message;
-  this.field = field.name
+  this.field = field.key
   this.fieldVal = value 
 }
 ValidatorError.prototype.__proto__ = Error.prototype
@@ -66,8 +68,7 @@ Form.prototype.validate = function validate(callback) {
   function validatorCallbackGen(cb) {
     return function validatorCallback(err) {
       if (err) {
-        var matches = /\[(.*)\]/.exec(err.field) 
-          , fieldName = matches[1]
+        var fieldName = err.field
         Array.isArray(error[fieldName]) ? error[fieldName].push(err) : error[fieldName] = [err]
       }
       cb(err);
