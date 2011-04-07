@@ -58,18 +58,19 @@ Form.prototype.validate = function validate(callback) {
           }
           
           if (fields[fieldName].validator) {
+            calledValidator = true;
             if (Array.isArray(fields[fieldName].validator)) multiValidator(fields[fieldName].validator, form, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
             else fields[fieldName].validator.call(form, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
           }
         }, this);
-        if (form.postValidator) {
+        if (form.postValidator && form.postValidator.length) {
           calledValidator = true;
           multiValidator(form.postValidator, form, validatorCallbackGen(this.parallel()))
         }
         if (!calledValidator) this();
       }
     , function (err) {
-        this(err ? false : true);
+        this(err ? false : true, err);
       }
     , callback
     );
