@@ -15,7 +15,11 @@ var step = require('step')
     fields[key].name = name + '[' + key + ']'
     fields[key].__proto__ = Field
   })
-  if (opts && opts.postValidator) this.postValidator = opts.postValidator
+  if (opts && opts.postValidator) this.postValidator = Array.isArray(this.postValidator) ? opts.postValidator : [opts.postValidator]
+  else this.postValidator = []
+  function f() {}
+  f.prototype = this
+  return f
 }
 
 , ValidatorError = exports.ValidatorError = function ValidatorError(field, message, value) {
@@ -32,6 +36,11 @@ Form.prototype.bindValues = function bindValues(values) {
   this.values = values;
 }
 
+Form.prototype.addPostValidator = function addPostValidator(validator) {
+  if (!this.hasOwnProperty('postValidator')) this.postValidator = this.postValidator.slice()
+  this.postValidator.push(validator)
+}
+
 Form.prototype.validate = function validate(callback) {
   var fields = this.fields
     , values = this.values
@@ -43,19 +52,19 @@ Form.prototype.validate = function validate(callback) {
         Object.keys(fields).forEach(function(fieldName) {
           if (fields[fieldName].required !== false && values[fieldName] == null || values[fieldName] === '') {
             calledValidator = true;
-            var err = new ValidatorError(fields[fieldName], 'required field', values[fieldName]);
+            var err = new ValidatorError(fields[fieldName], fields[fieldName].requiredMsg || 'required field', values[fieldName]);
             error[fieldName] = Array.isArray(error[fieldName]) ? error[fieldName].push(err) : [err]
             return this.parallel()(err);
           }
           
           if (fields[fieldName].validator) {
-            if (Array.isArray(fields[fieldName].validator)) multiValidator(fields[fieldName].validator, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
-            else fields[fieldName].validator(fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
+            if (Array.isArray(fields[fieldName].validator)) multiValidator(fields[fieldName].validator, form, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
+            else fields[fieldName].validator.call(form, fields[fieldName], values[fieldName], validatorCallbackGen(this.parallel()));
           }
         }, this);
         if (form.postValidator) {
           calledValidator = true;
-          form.postValidator(validatorCallbackGen(this.parallel()));
+          multiValidator(form.postValidator, form, validatorCallbackGen(this.parallel()))
         }
         if (!calledValidator) this();
       }
@@ -76,21 +85,34 @@ Form.prototype.validate = function validate(callback) {
   }
 }
 
-function multiValidator(validatorList, field, val, callback) {
+function multiValidator(validatorList, form, field, val, callback) {
   var cur = 0
-    , len = validatorList.length;
+    , len = validatorList.length
+    , callIt
+    
+  if (typeof field === 'function') {
+   callIt = function() {
+      validatorList[cur].call(form, cb)
+    }
+    callback = field
+  }
+  else {
+    callIt = function () {
+      validatorList[cur].call(form, field, val, cb)
+    }
+  }
   function cb(err) {
     cur++;
     if (err) return callback(err);
     if (cur == len) return callback(); 
-    validatorList[cur](field, val, cb);
+    callIt()
   } 
-  validatorList[cur](field, val, cb);
+  callIt()
 }
 
 exports.validator = {}
 exports.widgets = {}
-exports.fields = {};
+exports.fields = {}
 
 ;['choice' 
 , 'length'
