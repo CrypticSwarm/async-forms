@@ -1,6 +1,6 @@
 var jade = require('jade'),
   Compiler = jade.Compiler,
-  Parser = require('jade/parser'),
+  Parser = jade.Parser, //require('jade/parser'), 
   nodes = jade.nodes,
   fs = require('fs');
 
@@ -21,8 +21,8 @@ var exports = module.exports = function setupFormVisitor(templatePath) {
 
   Visitor.prototype.visit = function(node){
     this.visit = Compiler.prototype.visit;
-    var form = node[0].name;
-    this.compiler.options.locals.$$widgets = exports.widgets;
+    var form = node.nodes[0].name;
+    this.compiler.options.$$widgets = exports.widgets;
     var p = new Parser(template.replace(/%s/g, form), templatePath)
     p = p.parse();
     this.visitNode(p);

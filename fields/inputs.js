@@ -8,7 +8,7 @@ module.exports = function(validators, widgets, fields, ValidatorError) {
 
 function inputType(type) {
   return function inputTypeForm(name, val, buf, opts) {
-    buf.push('<input type="' + type + '" name="' + name + '"')
+    buf.push('<input type="' + type + '" id="' + name + '" name="' + name + '"')
     if (val != null) buf.push(' value="'+ val + '"');
     buf.push(' />');
   }
