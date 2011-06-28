@@ -1,0 +1,10 @@
+{ "name": "jade-form"
+, "description": "Provides a interface for quickly making and displaying forms in node with Jade."
+, "version": "0.1.0"
+, "authors": ["Perrin Westrich <crypticswarm@gmail.com>"]
+, "repository":
+  { "type": "git"
+  }
+, "main": "./main.js"
+, "dependencies": { "express": "1.0.7", "jade": "0.12.4" }
+}
