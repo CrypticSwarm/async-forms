@@ -4,6 +4,7 @@ module.exports = function(validators, widgets, fields, ValidatorError) {
   widgets.checkbox = inputType('checkbox')
   widgets.hidden = inputType('hidden')
   widgets.textArea = textArea
+  widgets.hidden.noLabel = true
 }
 
 function inputType(type) {
