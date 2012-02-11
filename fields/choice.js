@@ -20,6 +20,7 @@ module.exports = function(validators, widgets, fields, ValidatorError) {
         buf += '>' + choices[choice] + '</option>'
       })
       buf += '</select>'
+      return buf
     }
   }
 

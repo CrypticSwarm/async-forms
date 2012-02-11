@@ -12,6 +12,7 @@ function inputType(type) {
     var buf = '<input type="' + type + '" id="' + name + '" name="' + name + '"'
     if (val != null) buf += ' value="'+ val + '"'
     buf += ' />'
+    return buf
   }
 }
 
@@ -22,5 +23,6 @@ function textArea(rows, cols) {
     var buf = '<textarea name="' + name + '" rows="' + rows + '" cols="' + cols + '">'
     if (val != null) buf += ' value="'+ val + '"'
     buf += '</textarea>'
+    return buf
   }
 }
