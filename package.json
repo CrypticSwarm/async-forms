@@ -1,6 +1,6 @@
-{ "name": "jade-form"
+{ "name": "async-forms"
 , "description": "Provides a interface for quickly making and displaying forms in node with Jade."
-, "version": "0.1.0"
+, "version": "0.0.1"
 , "authors": ["Perrin Westrich <crypticswarm@gmail.com>"]
 , "repository":
   { "type": "git"
