@@ -1,5 +1,5 @@
 { "name": "async-forms"
-, "description": "Provides a interface for quickly making and displaying forms in node with Jade."
+, "description": "Provides a interface for quickly making and validating forms in node."
 , "version": "0.0.1"
 , "authors": ["Perrin Westrich <crypticswarm@gmail.com>"]
 , "repository":
