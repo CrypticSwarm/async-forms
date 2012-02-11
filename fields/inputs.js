@@ -8,10 +8,10 @@ module.exports = function(validators, widgets, fields, ValidatorError) {
 }
 
 function inputType(type) {
-  return function inputTypeForm(name, val, buf, opts) {
-    buf.push('<input type="' + type + '" id="' + name + '" name="' + name + '"')
-    if (val != null) buf.push(' value="'+ val + '"');
-    buf.push(' />');
+  return function inputTypeForm(name, val) {
+    var buf = '<input type="' + type + '" id="' + name + '" name="' + name + '"'
+    if (val != null) buf += ' value="'+ val + '"'
+    buf += ' />'
   }
 }
 
@@ -19,8 +19,8 @@ function textArea(rows, cols) {
   rows = rows || 10
   cols = cols || 30
   return function(name, val, buf, opts) {
-    buf.push('<textarea name="' + name + '" rows="' + rows + '" cols="' + cols + '">')
-    if (val != null) buf.push(' value="'+ val + '"');
-    buf.push('</textarea>')
+    var buf = '<textarea name="' + name + '" rows="' + rows + '" cols="' + cols + '">'
+    if (val != null) buf += ' value="'+ val + '"'
+    buf += '</textarea>'
   }
 }

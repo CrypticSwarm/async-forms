@@ -11,15 +11,15 @@ module.exports = function(validators, widgets, fields, ValidatorError) {
 
   widgets.choice = function(choices, defaultVal) {
     var keys = Object.keys(choices);
-    return function renderChoiceWidget(name, val, buf, opts) {
+    return function renderChoiceWidget(name, val) {
       if (val == null) val = defaultVal;
-      buf.push('<select name="' + name + '">');
+      var buf = '<select name="' + name + '">'
       keys.forEach(function(choice){
-        buf.push('<option value="' + choice + '"')
-        if(val == choice) buf.push(' selected="selected"')
-        buf.push('>' + choices[choice] + '</option>')
+        buf += '<option value="' + choice + '"'
+        if(val == choice) buf += ' selected="selected"'
+        buf += '>' + choices[choice] + '</option>'
       })
-      buf.push('</select>')
+      buf += '</select>'
     }
   }
 
