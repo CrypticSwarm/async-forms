@@ -6,5 +6,5 @@
   { "type": "git"
   }
 , "main": "./main.js"
-, "dependencies": { "express": "1.0.7", "jade": "0.12.4" }
+, "dependencies": {}
 }
