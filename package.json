@@ -5,6 +5,6 @@
 , "repository":
   { "type": "git"
   }
-, "main": "./main.js"
+, "main": "./forms.js"
 , "dependencies": {}
 }
